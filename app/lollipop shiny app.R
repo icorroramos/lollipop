@@ -162,7 +162,7 @@ server <- function(input, output, session) {
       p <- ggplot() +
         geom_violin(
           data = psa, aes(y = scenario, x = NMB),
-          fill = "lightgreen", alpha = 0.22, color = NA, scale = "width",
+          fill = "grey", alpha = 0.22, color = NA, scale = "width",
           trim = FALSE, na.rm = TRUE, orientation = "y"
         ) +
         geom_segment(
