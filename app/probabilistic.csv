@@ -1,0 +1,10 @@
+scenario,mean_NMB,sd_NMB
+Scenario H,-1000,600
+Scenario B,-500,400
+Scenario F,-300,300
+Scenario E,300,800
+Scenario G,450,500
+Scenario C,800,600
+Scenario A,1200,700
+Base case,1500,800
+Scenario D,1600,900

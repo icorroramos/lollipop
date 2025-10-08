@@ -1,0 +1,10 @@
+scenario,INMB
+Scenario H,-1000
+Scenario B,-500
+Scenario F,-300
+Scenario E,300
+Scenario G,450
+Scenario C,800
+Scenario A,1200
+Base case,1500
+Scenario D,1600
