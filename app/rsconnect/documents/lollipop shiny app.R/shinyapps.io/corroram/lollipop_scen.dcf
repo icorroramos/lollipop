@@ -1,0 +1,13 @@
+name: lollipop_scen
+title: lollipop_scen
+username: corroram
+account: corroram
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 15697971
+bundleId: 11011736
+url: https://corroram.shinyapps.io/lollipop_scen/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .RData|deterministic - steps.csv|deterministic.csv|probabilistic.csv
