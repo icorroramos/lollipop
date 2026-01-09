@@ -210,3 +210,106 @@ ggplot() +
             hjust = ifelse(scenario_results$NMB > 0, -0.3, 1.3),
             color = "black", size = 3) +
   theme(legend.position = "none")
+
+
+# deterministic scenario analysis (two WTPs in one lollipop plot)
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+set.seed(42)
+
+# --- Deterministic scenario inputs ---
+scenario_inputs <- data.frame(
+  scenario = paste("Scenario", LETTERS[1:10]),
+  incremental_cost = runif(10, 8000, 20000),
+  incremental_qaly = runif(10, 0.4, 1.0)
+)
+
+# Two WTP thresholds
+wtps <- c(20000, 30000)
+
+# --- Calculate NMB for each scenario under each WTP ---
+scenario_results <- scenario_inputs %>%
+  tidyr::crossing(wtp = wtps) %>%
+  mutate(
+    NMB = incremental_qaly * wtp - incremental_cost,
+    wtp_label = paste0("WTP = €", format(wtp, big.mark = ","))
+  )
+
+# Base-case inputs (choose fixed IC and IQ, then compute NMB per WTP)
+# Set these so that at WTP=20000, NMB = 1500 (as in your original)
+base_case_inputs <- data.frame(
+  scenario = "Base case",
+  incremental_cost = 8500,
+  incremental_qaly = 0.5
+)
+
+base_case <- base_case_inputs %>%
+  tidyr::crossing(wtp = wtps) %>%
+  mutate(
+    NMB = incremental_qaly * wtp - incremental_cost,
+    wtp_label = paste0("WTP = €", format(wtp, big.mark = ","))
+  )
+
+scenario_results <- bind_rows(scenario_results, base_case)
+
+# Order scenarios by NMB at WTP = 20000
+scenario_order <- scenario_results %>%
+  filter(wtp == 20000) %>%
+  arrange(NMB) %>%
+  pull(scenario)
+
+scenario_results$scenario <- factor(scenario_results$scenario, levels = scenario_order)
+
+# Numeric x-position so segments are perfectly straight; manual dodge for two WTPs
+scenario_results <- scenario_results %>%
+  arrange(scenario, wtp) %>%
+  mutate(
+    x = as.numeric(scenario),
+    x_dodge = x + ifelse(wtp == 20000, -0.18, 0.18)
+  )
+
+ggplot(scenario_results) +
+  # Straight lollipop sticks
+  geom_segment(
+    aes(x = x_dodge, xend = x_dodge, y = 0, yend = NMB, color = wtp_label),
+    linewidth = 1
+  ) +
+  # Points
+  geom_point(
+    aes(
+      x = x_dodge, y = NMB, color = wtp_label,
+      shape = ifelse(scenario == "Base case", "Base case", "Scenario")
+    ),
+    size = 4
+  ) +
+  # Reference line
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray40") +
+  # Value labels
+  geom_text(
+    aes(
+      x = x_dodge, y = NMB, label = round(NMB, 0),
+      hjust = ifelse(NMB > 0, -0.25, 1.25)
+    ),
+    color = "black",
+    size = 3
+  ) +
+  # Scales + labels
+  scale_shape_manual(values = c("Scenario" = 16, "Base case" = 17)) +
+  scale_x_continuous(
+    breaks = seq_along(levels(scenario_results$scenario)),
+    labels = levels(scenario_results$scenario)
+  ) +
+  labs(
+    title = "Incremental Net Monetary Benefit (two WTP thresholds)",
+    x = "Scenario",
+    y = "Incremental NMB (€)",
+    color = NULL,
+    shape = NULL
+  ) +
+  theme_minimal() +
+  coord_flip() +
+  theme(legend.position = "bottom")
+
